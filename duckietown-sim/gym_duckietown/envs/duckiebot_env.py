@@ -178,7 +178,7 @@ class DuckiebotEnv(gym.Env):
             context = pyglet.gl.get_current_context()
             self.window = pyglet.window.Window(
                 width=WINDOW_WIDTH,
-                height=WINDOW_HEIGHT
+                height=WINDOW_HEIGHT,
             )
 
         self.window.switch_to()
