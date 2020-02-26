@@ -1,4 +1,4 @@
-name: sdc_decal
+name: sdc_decal2
 dependencies:
     - python=3.6
     - pyzmq=18.1.1
