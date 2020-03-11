@@ -1,4 +1,5 @@
 import os
+from utils import nn
 
 class Car_Interface():
     '''
@@ -12,8 +13,6 @@ class Car_Interface():
             raise Exception(f"Illegal argument model can only be 'simple' or 'complex' not {model}")
 
         self.model = model
-        if (self.model == "complex"):
-            import sysid.nn as nn
 
         #Variables to keep track of the car's current state
         self.position = 0
@@ -39,11 +38,20 @@ class Car_Interface():
         All except for the brake_weight should be positive.
         '''
         #Coefficients corresponding to the motion dynamics
+<<<<<<< HEAD
         self.rolling_bias = .009947910
         self.friction_constant = -.109932017
 
         self.accelerator_weight = .10010019999
         self.brake_weight = -.250007955
+=======
+        self.rolling_bias = 0.009947910986042047 #None
+        self.friction_constant = -0.10993201738325734 #None
+
+        self.accelerator_weight = 0.10010019999832567 #None
+        self.brake_weight = -0.25000795511647905 #None
+        #raise Exception("You forgot to input SystemID learned weights in the Controller Model")
+>>>>>>> e99a199750cfeae6787a2efe39f982eee70bd0d3
 
         '''
         If approximating the complex internal model we use a FCN
@@ -53,7 +61,7 @@ class Car_Interface():
         The model has 3 inputs (accelerator depression, brake depression, velocity)
         '''
         if (self.model == "complex"):
-            self.complex_accel_fcn = nn.fcn(model_name = os.path.join(self.sys_id_fp(), "complex_accel"), num_inputs = 3)
+            self.complex_accel_fcn = nn.fcn(model_name = self.complex_weights_fp(), num_inputs = 3)
 
         #Variables to keep track of time (seconds)
         self.T = 0
@@ -112,8 +120,8 @@ class Car_Interface():
 
             self.accel should be set to the sum of these components.
             '''
-
             #CODE HERE (Delete exception too)
+<<<<<<< HEAD
             a = 0
             b = 0
             if pedal is self.ACCELERATOR:
@@ -121,6 +129,16 @@ class Car_Interface():
             elif pedal is self.BRAKE:
                 b = amount
             self.accel = (a * self.accelerator_weight) + (self.brake_weight * b) + self.friction_constant*self.velocity + self.rolling_bias
+=======
+            accel_amt = 0
+            brake_amt = 0
+            if pedal is self.ACCELERATOR:
+                accel_amt = amount
+            elif pedal is self.BRAKE: 
+                brake_amt = amount
+            self.accel = self.accelerator_weight * accel_amt + self.brake_weight * brake_amt + self.friction_constant * self.velocity + self.rolling_bias
+            #raise Exception("You forgot to fill Simple Acceleration Calcs in the Controller Model")
+>>>>>>> e99a199750cfeae6787a2efe39f982eee70bd0d3
 
         elif (self.model == "complex"):
             '''
@@ -174,9 +192,18 @@ class Car_Interface():
         HINT: position update should have a linear term in velocity, and a quadratic
               term in acceleration.
         '''
+<<<<<<< HEAD
 
         self.position += (self.velocity*self.dt + .5 * self.accel ** 2)
         self.velocity += self.accel*self.dt
+=======
+        
+        # UNCOMMENT AND FILL IN (Delete exception too)
+        self.position += (self.dt * self.velocity + 0.5 * self.accel ** 2)
+        self.velocity += self.dt * self.accel
+        
+        # raise Exception("You forgot to fill in pos/vel dynamics in the Controller Model")
+>>>>>>> e99a199750cfeae6787a2efe39f982eee70bd0d3
 
         #These ensure that the velocity is never against the current gear setting.
         if (self.gear == self.FORWARD):
@@ -210,11 +237,11 @@ class Car_Interface():
     def steer_to(self, ang):
         self.steering_angle = max(-1, min(ang, 1))
 
-    def sys_id_fp(self):
-        import settings
-
+    '''
+    Crawls the working directory up to the top most folder for which
+    car_iface should be a child directory.  Adds the name of the file
+    to get the learned weights for the complex model.
+    '''
+    def complex_weights_fp(self):
         cur_dir = os.path.dirname(__file__)
-        internal_path = os.path.join(cur_dir, '../../internal_only/sysid/')
-        if settings.use_internal_if_available and os.path.exists(internal_path):
-            return internal_path
-        return os.path.join(os.path.dirname(__file__), '../sysid/')
+        return os.join(cur_fp, "complex_accel")
