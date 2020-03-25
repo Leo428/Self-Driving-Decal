@@ -38,20 +38,12 @@ class Car_Interface():
         All except for the brake_weight should be positive.
         '''
         #Coefficients corresponding to the motion dynamics
-<<<<<<< HEAD
-        self.rolling_bias = .009947910
-        self.friction_constant = -.109932017
-
-        self.accelerator_weight = .10010019999
-        self.brake_weight = -.250007955
-=======
         self.rolling_bias = 0.009947910986042047 #None
         self.friction_constant = -0.10993201738325734 #None
 
         self.accelerator_weight = 0.10010019999832567 #None
         self.brake_weight = -0.25000795511647905 #None
         #raise Exception("You forgot to input SystemID learned weights in the Controller Model")
->>>>>>> e99a199750cfeae6787a2efe39f982eee70bd0d3
 
         '''
         If approximating the complex internal model we use a FCN
@@ -121,15 +113,6 @@ class Car_Interface():
             self.accel should be set to the sum of these components.
             '''
             #CODE HERE (Delete exception too)
-<<<<<<< HEAD
-            a = 0
-            b = 0
-            if pedal is self.ACCELERATOR:
-                a = amount
-            elif pedal is self.BRAKE:
-                b = amount
-            self.accel = (a * self.accelerator_weight) + (self.brake_weight * b) + self.friction_constant*self.velocity + self.rolling_bias
-=======
             accel_amt = 0
             brake_amt = 0
             if pedal is self.ACCELERATOR:
@@ -138,7 +121,6 @@ class Car_Interface():
                 brake_amt = amount
             self.accel = self.accelerator_weight * accel_amt + self.brake_weight * brake_amt + self.friction_constant * self.velocity + self.rolling_bias
             #raise Exception("You forgot to fill Simple Acceleration Calcs in the Controller Model")
->>>>>>> e99a199750cfeae6787a2efe39f982eee70bd0d3
 
         elif (self.model == "complex"):
             '''
@@ -192,18 +174,12 @@ class Car_Interface():
         HINT: position update should have a linear term in velocity, and a quadratic
               term in acceleration.
         '''
-<<<<<<< HEAD
-
-        self.position += (self.velocity*self.dt + .5 * self.accel ** 2)
-        self.velocity += self.accel*self.dt
-=======
         
         # UNCOMMENT AND FILL IN (Delete exception too)
         self.position += (self.dt * self.velocity + 0.5 * self.accel ** 2)
         self.velocity += self.dt * self.accel
         
         # raise Exception("You forgot to fill in pos/vel dynamics in the Controller Model")
->>>>>>> e99a199750cfeae6787a2efe39f982eee70bd0d3
 
         #These ensure that the velocity is never against the current gear setting.
         if (self.gear == self.FORWARD):

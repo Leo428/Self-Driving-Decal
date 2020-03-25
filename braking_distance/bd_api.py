@@ -78,9 +78,11 @@ class Braking_Distance_Estimator():
     '''
     def simple_analytical_sd(self, initial_velocity, amt):
         #CODE HERE: Paste corresponding code from Jupyter Notebook
+        return
 
     def simple_analytical_approx(self, inp, tol = 1e-5, min_amt = 0, max_amt = 1):
         #CODE HERE: Paste corresponding code from Jupyter Notebook
+        return
 
     #File path to Braking Distance folder
     def bd_fp(self):
