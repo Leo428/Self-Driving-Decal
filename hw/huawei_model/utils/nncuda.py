@@ -20,7 +20,7 @@ class fcn(nn.Module):
     '''
     def __init__(self, model_name, num_inputs, out_range = None, retrain = False):
         super().__init__()
-
+        self.device = torch.device('cuda')
         #Set the weights file path as the model name
         self.weights_fp = model_name + ".pt"
         #out range will should either be None or of the form (a, b)
@@ -65,6 +65,7 @@ class fcn(nn.Module):
         #Load previously saved weights if not retraining.
         if (not retrain):
             self.load_saved_weights()
+        self.cuda(self.device)
 
     '''
     Forward propogation algorithm. Note calling model(inp) is equivalent to calling
@@ -77,16 +78,16 @@ class fcn(nn.Module):
     def forward(self, x, clamp = True):
         
         # x will be a matrix of dimension [batch size, num_inputs] (note batch size can vary during usage).
-        x = torch.tensor(x, dtype = torch.float32)
+        x = torch.tensor(x, dtype = torch.float32, device=self.device)
 
         # first hidden layer computation with tanh activation. [batch size, num_inputs] -> [batch size, H_1]
-        h_1 = torch.tanh(torch.matmul(x, self.W_1) + self.B_1)
+        h_1 = torch.tanh(torch.matmul(x, self.W_1).cuda(device=self.device) + self.B_1).cuda(self.device)
     
         # second hidden layer computation with tanh activation. [batch size, H_1] -> [batch size, H_2]
-        h_2 = torch.tanh(torch.matmul(h_1, self.W_2) + self.B_2)
+        h_2 = torch.tanh(torch.matmul(h_1, self.W_2).cuda(self.device) + self.B_2).cuda(self.device)
         
         #output computation with no activation.  [batch size, H_2] - (MatMul) > [batch size, 1] - (Squeeze) > [batch size]
-        out = torch.squeeze(torch.matmul(h_2, self.W_3) + self.B_3)
+        out = torch.squeeze(torch.matmul(h_2, self.W_3).cuda(self.device) + self.B_3).cuda(self.device)
 
         '''
         If the output has no specified range or it does but we are not clamping the output
@@ -99,7 +100,7 @@ class fcn(nn.Module):
         if (self.out_range is None or not clamp):
             return out
         else:
-            return torch.clamp(out, self.out_range[0], self.out_range[1])
+            return torch.clamp(out, self.out_range[0], self.out_range[1]).cuda(self.device)
 
     '''
     Trains the Fully Connected Network using the provided data for
@@ -165,7 +166,7 @@ class fcn(nn.Module):
                 automatic gradient calculation features and thus we know how to adjust the
                 model parameters to minimize the loss.
                 '''
-                b_loss = torch.mean((torch.tensor(targ, dtype = torch.float32) - out) ** 2)
+                b_loss = torch.mean((torch.tensor(targ, dtype = torch.float32, device=self.device) - out) ** 2).cuda(self.device)
 
             
                 #Zero the current gradients so we don't accumulate the previous gradients.
@@ -176,7 +177,7 @@ class fcn(nn.Module):
                 self.optimizer.step()
 
                 #Now that we are done with torch's automatic gradient we can convert to a normal number.
-                b_loss = b_loss.detach().numpy()
+                b_loss = b_loss.detach().cpu().clone().numpy()
                 #Increment the epoch loss
                 e_loss += b_loss
 
@@ -189,7 +190,7 @@ class fcn(nn.Module):
             a new line 5 times over the full training procedure, so we can monitor model progress.
             '''
             # if (e % int(num_epochs / 5) == 0):
-            #     print()
+                # print()
 
             #Save the weights after training in the file path that corresponds to the model name.
             torch.save(self.state_dict(), open(self.weights_fp, "wb"))
@@ -209,6 +210,6 @@ class fcn(nn.Module):
     '''
     def load_saved_weights(self):
         if (os.path.exists(self.weights_fp)):
-            self.load_state_dict(torch.load(open(self.weights_fp, "rb")))
+            self.load_state_dict(torch.load(open(self.weights_fp, "rb"), map_location=self.device))
         else:
             print("WARNING: Weights file not found, initializing fcn with random weights.")
